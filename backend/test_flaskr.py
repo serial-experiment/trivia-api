@@ -116,9 +116,9 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().post("/questions/search", json={})
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 404)
         self.assertFalse(data["success"])
-        self.assertEqual(data["message"], "Unprocessable")
+        self.assertEqual(data["message"], "Not found")
 
     def test_get_questions_by_category(self):
         """Test get questions by category"""
@@ -163,6 +163,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertFalse(data["success"])
         self.assertEqual(data["message"], "Unprocessable")
+
+    def test_get_categories_not_found(self):
+        """Test get categories not found"""
+        res = self.client().get("/categories/1000")
+        data = json.loads(res.data)
+
+        self.assertEqual(data["error"], 404)
+        self.assertFalse(data["success"])
+        self.assertEqual(data["message"], "Not found")
+    
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

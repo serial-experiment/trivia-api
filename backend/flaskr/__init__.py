@@ -8,6 +8,7 @@ from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 6
 
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -39,7 +40,7 @@ def create_app(test_config=None):
             'success': True,
             'categories': categories_dict
         })
- 
+
     @app.route("/questions", methods=["GET"])
     def get_questions():
         page = request.args.get("page", 1, type=int)
@@ -52,7 +53,7 @@ def create_app(test_config=None):
         categories_dict = {}
         for category in categories:
             categories_dict[category.id] = category.type
-        
+
         return jsonify(
             {
                 "success": True,
@@ -61,7 +62,6 @@ def create_app(test_config=None):
                 "categories": categories_dict,
             }
         )
-
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
@@ -78,7 +78,8 @@ def create_app(test_config=None):
     def add_question():
         body = request.get_json()
 
-        if not ('question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
+        if not (
+                'question' in body and 'answer' in body and 'difficulty' in body and 'category' in body):
             abort(422)
 
         new_question = body.get('question')
@@ -96,7 +97,7 @@ def create_app(test_config=None):
                 'created': question.id,
             })
 
-        except:
+        except BaseException:
             abort(422)
 
     @app.route('/questions/search', methods=['POST'])
@@ -115,10 +116,11 @@ def create_app(test_config=None):
                 'current_category': None
             })
         abort(404)
-    
+
     @app.route("/categories/<int:category_id>/questions", methods=["GET"])
     def get_questions_by_category(category_id):
-        questions = Question.query.filter(Question.category == category_id).all()
+        questions = Question.query.filter(
+            Question.category == category_id).all()
         formatted_questions = [question.format() for question in questions]
 
         return jsonify(
@@ -128,7 +130,7 @@ def create_app(test_config=None):
                 "total_questions": len(formatted_questions),
             }
         )
-    
+
     @app.route("/quizzes", methods=["POST"])
     def get_quiz_question():
         body = request.get_json()
@@ -156,19 +158,20 @@ def create_app(test_config=None):
             random_question = random.choice(formatted_questions)
 
         return jsonify({"success": True, "question": random_question})
-    
+
     @app.errorhandler(404)
     def not_found(error):
         return (
             jsonify({"success": False, "error": 404, "message": "Not found"}),
             404,
         )
-    
+
     @app.errorhandler(422)
     def unprocessable(error):
         return (
-            jsonify({"success": False, "error": 422, "message": "Unprocessable"}),
+            jsonify({"success": False, "error": 422,
+                    "message": "Unprocessable"}),
             422,
         )
-    
+
     return app
